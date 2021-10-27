@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/Kratos40-sba/go-prod/internal/comment"
+	"github.com/Kratos40-sba/go-prod/internal/database"
 	transportHTTP "github.com/Kratos40-sba/go-prod/internal/transport/http"
 	"log"
 	"net/http"
@@ -11,7 +13,17 @@ type App struct{}
 
 // Run - sets up our application
 func (app *App) Run() error {
-	handler := transportHTTP.NewHandler()
+	var err error
+	db, err := database.NewDatabase()
+	if err != nil {
+		return err
+	}
+	err = database.MigrateDB(db)
+	if err != nil {
+		return err
+	}
+	commentService := comment.NewService(db)
+	handler := transportHTTP.NewHandler(commentService)
 	handler.SetupRoutes()
 	if err := http.ListenAndServe(":8080", handler.Router); err != nil {
 		log.Println("Failed to setup server")
