@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"log"
+	logLib "github.com/sirupsen/logrus"
 	"os"
 )
 
 func NewDatabase() (*gorm.DB, error) {
-	log.Println("Setting up new database connection")
+	logLib.Info("Setting up new database connection")
 	dbUserName := os.Getenv("DB_UNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")

@@ -4,15 +4,23 @@ import (
 	"github.com/Kratos40-sba/go-prod/internal/comment"
 	"github.com/Kratos40-sba/go-prod/internal/database"
 	transportHTTP "github.com/Kratos40-sba/go-prod/internal/transport/http"
-	"log"
+	logLib "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 // App - contains a pointer to db connection
-type App struct{}
+type App struct {
+	Name    string
+	Version string
+}
 
 // Run - sets up our application
 func (app *App) Run() error {
+	logLib.SetFormatter(&logLib.JSONFormatter{})
+	logLib.WithFields(logLib.Fields{
+		"AppName":    app.Name,
+		"AppVersion": app.Version,
+	}).Info("Setting up application")
 	var err error
 	db, err := database.NewDatabase()
 	if err != nil {
@@ -26,17 +34,20 @@ func (app *App) Run() error {
 	handler := transportHTTP.NewHandler(commentService)
 	handler.SetupRoutes()
 	if err := http.ListenAndServe(":8080", handler.Router); err != nil {
-		log.Println("Failed to setup server")
+		logLib.Error("Failed to set up server")
 		return err
 	}
 	return nil
 }
 
 func main() {
-	log.Println("Hello from main function")
-	app := App{}
+	app := App{
+		Name:    "Commenting Service",
+		Version: "1.0.0",
+	}
 	if err := app.Run(); err != nil {
-		log.Println("Error while starting The APP : ", err)
+		logLib.Error("Error starting up our REST API")
+		logLib.Fatal(err)
 	}
 
 }

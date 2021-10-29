@@ -24,6 +24,11 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: secretkey
+                  name: config-secrets
             - name: DB_UNAME
               valueFrom:
                 secretKeyRef:
