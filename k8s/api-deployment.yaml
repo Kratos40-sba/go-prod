@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-api-deployment
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      name: comments-api
+  template:
+    metadata:
+      labels:
+        name: comments-api
+    spec:
+      containers:
+        - name: comments-api
+          image: "kratos40sba/comments-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_UNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: config-secrets
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: config-secrets
+            - name: DB_DB
+              valueFrom:
+                configMapKeyRef:
+                  key: db
+                  name: config-map
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: host
+                  name: config-map
+            - name: DB_TABLE
+              valueFrom:
+                configMapKeyRef:
+                  key: table
+                  name: config-map
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: db_port
+                  name: config-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment-api-service
+spec:
+  type: NodePort
+  selector:
+    name: comments-api
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+#sudo kubectl port-forward service/comment-api-service 8080:8080

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map
+data:
+  db: "postgres"
+  host: postgres-service
+  table: "postgres"
+  db_port: "5432"
+
